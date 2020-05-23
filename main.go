@@ -9,29 +9,31 @@ func main() {
 	// Инициализируем GTK.
 	gtk.Init(nil)
 
-	// Создаём окно верхнего уровня, устанавливаем заголовок
-	// И соединяем с сигналом "destroy" чтобы можно было закрыть
-	// приложение при закрытии окна
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	// Создаём билдер
+	b, err := gtk.BuilderNew()
 	if err != nil {
-		log.Fatal("Не удалось создать окно:", err)
+		log.Fatal("Ошибка:", err)
 	}
-	win.SetTitle("Простой пример")
+
+	// Загружаем в билдер окно из файла Glade
+	err = b.AddFromFile("main.glade")
+	if err != nil {
+		log.Fatal("Ошибка:", err)
+	}
+
+	// Получаем объект главного окна по ID
+	obj, err := b.GetObject("window_main")
+	if err != nil {
+		log.Fatal("Ошибка:", err)
+	}
+
+	// Преобразуем из объекта именно окно типа gtk.Window
+	// и соединяем с сигналом "destroy" чтобы можно было закрыть
+	// приложение при закрытии окна
+	win := obj.(*gtk.Window)
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
-
-	// Создаём новую метку чтобы показать её в окне
-	l, err := gtk.LabelNew("Привет, gotk3!")
-	if err != nil {
-		log.Fatal("Не удалось создать метку:", err)
-	}
-
-	// Добавляем метку в окно
-	win.Add(l)
-
-	// Устанавливаем размер окна по умолчанию
-	win.SetDefaultSize(800, 600)
 
 	// Отображаем все виджеты в окне
 	win.ShowAll()
